@@ -58,4 +58,20 @@ class QuizTest(TestCase):
         self.assertEqual(self.session.id, response.data.get('session_id'))
         self.assertEqual(self.question.id, response.data.get('question_id'))
         self.assertIn('result', response.data)
+        self.assertEqual('Correct', response.data.get('result'))
         self.assertIn('score', response.data)
+
+    def test_quiz_report(self):
+        """method to test (GET api/quiz) endpoint"""
+        self.client.post(reverse('answer'), data=self.answer_payload)
+
+        response = self.client.get(reverse("quiz") + f"?session_id={self.session.id}")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.session.id, response.data.get('session_id'))
+        self.assertIn('total_questions', response.data.get('stats'))
+        self.assertIn('correct_questions', response.data.get('stats'))
+        self.assertIn('incorrect_questions', response.data.get('stats'))
+        self.assertEqual(1, response.data['stats'].get('correct_questions'))
+        self.assertEqual(1, response.data['stats'].get('total_questions'))
+        self.assertEqual(0, response.data['stats'].get('incorrect_questions'))
