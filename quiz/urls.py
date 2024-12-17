@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import StartQuizView, GetQuestionView
+from .views import StartQuizView, RandomQuestionView, SubmitAnswerView
 
 urlpatterns=[
-    path('start-quiz/', StartQuizView.as_view(), name='start-quiz'),
-    path('get-question/', GetQuestionView.as_view(), name='get-question'),
+    path('quiz/', StartQuizView.as_view(), name='quiz'),
+    path('question/random/', RandomQuestionView.as_view(), name='random'),
+    path('answer/', SubmitAnswerView.as_view(), name='answer'),
 ]

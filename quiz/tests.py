@@ -1,8 +1,9 @@
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
-from .models import QuizSession, Questions
+from .models import QuizSession
 from .serializers import QuestionsSerializer
+from .config import TestConfig
 
 # Create your tests here.
 
@@ -13,34 +14,48 @@ class QuizTest(TestCase):
     def setUp(self):
         """method for setting up client for all the below tests"""
         self.client = APIClient()
+        self.session = QuizSession.objects.create()
+        self.test_data = TestConfig.TEST_DATA
+        self.question_serializer = QuestionsSerializer(data=self.test_data)
+
+        if self.question_serializer.is_valid():
+            self.question = self.question_serializer.save()
+        else:
+            print(f"Validation Error: {self.question_serializer.errors}")
+
+        self.answer_payload = {
+            'session_id':self.session.id,
+            'question_id':self.question.id,
+            'answer':TestConfig.TEST_ANSWER
+        }
+
 
     def test_start_quiz_session(self):
-        """method to test (POST api/start-quiz) endpoint"""
-        response = self.client.post(reverse("start-quiz"))
+        """method to test (POST api/quiz) endpoint"""
+        response = self.client.post(reverse("quiz"))
         self.assertEqual(response.status_code, 201)
         self.assertIn("session_id", response.data)
 
-    def test_get_random_question(self):
-        """method to test (GET api/get-question) endpoint"""
-        session = QuizSession.objects.create()
-        data = {
-            "question_text":"What is the name of the programming language developed by James Gosling at Sun Microsystems and named after the type of coffee from Indonesia",
-            "options":{"A": "Java", "B": "Python", "C": "C++", "D": "Ruby"},
-            # "options":["A","B","C","D"],
-            # "correct_option":"A",
-            "correct_option":"A",
-        }
 
-        serializer = QuestionsSerializer(data=data)
-
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            print(f"Validation Error: {serializer.errors}")
+    def test_random_question(self):
+        """method to test (GET api/question/random) endpoint"""
 
         response = self.client.get(
-            reverse("get-question") + f"?session_id={session.id}"
+            reverse("random") + f"?session_id={self.session.id}"
         )
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.session.id, response.data.get('session_id'))
         self.assertIn("question_id", response.data.get('question'))
         self.assertIn("options", response.data.get('question'))
+
+
+    def test_submit_answer(self):
+        """method to test (POST api/answer) endpoint"""
+
+        response = self.client.post(reverse('answer'), data=self.answer_payload)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.session.id, response.data.get('session_id'))
+        self.assertEqual(self.question.id, response.data.get('question_id'))
+        self.assertIn('result', response.data)
+        self.assertIn('score', response.data)
