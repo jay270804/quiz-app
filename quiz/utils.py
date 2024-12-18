@@ -14,7 +14,6 @@ def get_session_or_error(session_id):
         session = QuizSession.objects.get(pk=session_id)
     except QuizSession.DoesNotExist:
         return ({"error": "Quiz session does not exist"}, status.HTTP_400_BAD_REQUEST)
-
     return session
 
 

@@ -59,7 +59,7 @@ class SubmitAnswerView(APIView):
 
     def post(self, request):
         """method to handle post submit answer request"""
-        request_data = request.POST
+        request_data = request.data
         session_id = request_data.get('session_id')
         question_id = request_data.get('question_id')
         answer = request_data.get('answer')
