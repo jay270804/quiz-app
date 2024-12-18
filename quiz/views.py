@@ -1,7 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import QuizSession, Questions
 from .utils import get_session_or_error, create_quiz_session, prepare_session_stats, get_random_question_or_error, prepare_random_question_data, get_question_or_error, update_session_progress, prepare_submit_answer_data
 
 # Create your views here.

@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from .models import QuizSession
 from .serializers import QuestionsSerializer
-from .config import TestConfig
+from .config import TestConfig, SeedConfig
 
 # Create your tests here.
 
@@ -40,9 +40,16 @@ class QuizTest(TestCase):
     def test_random_question(self):
         """method to test (GET api/question/random) endpoint"""
 
+        self.test_data = SeedConfig.SEED_DATA
+        for data in self.test_data:
+            serializer = QuestionsSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+        
         response = self.client.get(
             reverse("random") + f"?session_id={self.session.id}"
         )
+        print(response.data['question'].get('question_text'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.session.id, response.data.get('session_id'))
         self.assertIn("question_id", response.data.get('question'))

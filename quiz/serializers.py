@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Questions
 
-VALID_KEYS={"A", "B", "C", "D", "E"}
+VALID_KEYS={"A", "B", "C", "D"}
 
 class QuestionsSerializer(serializers.ModelSerializer):
     """Serializer to validate Questions model"""
